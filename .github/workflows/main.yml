@@ -72,11 +72,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: lts/*
-          cache: yarn
+          cache: npm
           working-directory: infra
 
       - name: Installing dependencies 📦️
-        run: yarn install
+        run: npm install
         working-directory: infra
 
       - name: Authenticate with Google 🔑
