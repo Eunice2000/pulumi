@@ -74,6 +74,7 @@ jobs:
           node-version: lts/*
           cache: npm
           working-directory: infra
+      - run: cd infra 
 
       - name: Installing dependencies 📦️
         run: npm install
