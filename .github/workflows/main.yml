@@ -1,0 +1,55 @@
+name: Deploy Development Stack
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: infra
+
+      - id: auth
+        name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: '${{ secrets.WORKLOAD_IDENTITY_PROVIDER }}'
+          service_account: '${{ secrets.SERVICE_ACCOUNT_EMAIL }}'
+
+      - name: Set GCP Project
+        run: |
+          echo "GOOGLE_PROJECT_ID=${GCP_PROJECT_ID}" >> $GITHUB_ENV
+        env:
+          GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Preview Deployment
+        uses: pulumi/actions@v6
+        with:
+          command: preview
+          stack-name: project-1/development
+          cloud-url: gs://shortlet-pulumi-state
+          work-dir: infra
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+          GOOGLE_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Deploy Development Stack
+        uses: pulumi/actions@v6
+        with:
+          command: preview
+          stack-name: project-1/development
+          cloud-url: gs://shortlet-pulumi-state
+          work-dir: infra
+          args: --yes
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+          GOOGLE_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
