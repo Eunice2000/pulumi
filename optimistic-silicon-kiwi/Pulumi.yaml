@@ -1,0 +1,7 @@
+name: optimistic-silicon-kiwi
+description: A minimal Aiven TypeScript Pulumi program
+runtime: nodejs
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: aiven-typescript
