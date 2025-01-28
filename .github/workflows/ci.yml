@@ -54,42 +54,23 @@ jobs:
       - name: Configure Pulumi Backend (Google Cloud Storage)
         run: |
           echo "Setting up Pulumi backend storage in GCS..."
-          echo "export PULUMI_BACKEND_URL=gs://shortlet-pulumi-state" >> $GITHUB_ENV
-          echo "export PULUMI_CONFIG_PASSPHRASE=${{ secrets.PULUMI_CONFIG_PASSPHRASE }}" >> $GITHUB_ENV
-      
-      - name: Validate Pulumi Infrastructure
-        run: |
-          cd infra
-          pulumi login ${PULUMI_BACKEND_URL}
-          
-          # Check if the stack exists before selecting it
-          if pulumi stack ls --json | jq -r '.[].name' | grep -q "^development$"; then
-            echo "✅ Stack 'development' exists, selecting it..."
-            pulumi stack select development
-          else
-            echo "⚠️ Stack 'development' not found, creating it..."
-            pulumi stack init development
-            
-            # Optional wait to ensure the stack is fully initialized before proceeding
-            sleep 2 
-            
-            # List all stacks for debugging
-            echo "🔍 Listing all stacks after creation attempt..."
-            pulumi stack ls --json
-            
-            # Verify that the stack was created successfully
-            if pulumi stack ls --json | jq -r '.[].name' | grep -q "^development$"; then
-              echo "✅ Stack 'development' created successfully."
-            else
-              echo "❌ Failed to create stack 'development'. Exiting."
-              exit 1
-            fi
-          fi
-          
-          # Run Pulumi preview
-          echo "🔍 Running Pulumi preview for 'development' stack..."
-          pulumi preview --stack development
+          echo "PULUMI_BACKEND_URL=gs://shortlet-pulumi-state" >> $GITHUB_ENV
+          echo "PULUMI_CONFIG_PASSPHRASE=${{ secrets.PULUMI_CONFIG_PASSPHRASE }}" >> $GITHUB_ENV
+
+      - name: Install dependencies for infra
+        run: npm install
+        working-directory: infra
+
+      - name: Run Pulumi Preview
+        uses: pulumi/actions@v6
+        with:
+          command: preview
+          stack-name: project-1/development # Ensure this matches your actual Pulumi stack name
+          comment-on-pr: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          work-dir: infra
+          upsert: true
         env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          PULUMI_BACKEND_URL: gs://shortlet-pulumi-state
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
-  
-  
