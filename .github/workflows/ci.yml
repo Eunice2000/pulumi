@@ -71,10 +71,11 @@ jobs:
         run: |
           cd infra
           npm install
-
       - name: Validate Pulumi infrastructure
         run: |
           cd infra
           pulumi login ${PULUMI_BACKEND_URL}
-          export PULUMI_CONFIG_PASSPHRASE=${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+          pulumi stack init development
           pulumi preview --stack development
+        env:
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
