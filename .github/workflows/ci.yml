@@ -67,15 +67,19 @@ jobs:
           export PULUMI_BACKEND_URL=gs://shortlet-pulumi-state
           export PULUMI_CONFIG_PASSPHRASE=${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
 
-      - name: Navigate to /infra and install dependencies
-        run: |
-          cd infra
-          npm install
-      - name: Validate Pulumi infrastructure
+      - name: Validate Pulumi Infrastructure
         run: |
           cd infra
           pulumi login ${PULUMI_BACKEND_URL}
-          pulumi stack init development
+    
+          # Check if the stack exists, if not, create it
+          if pulumi stack select development --non-interactive; then
+            echo "Stack development exists, selecting it..."
+          else
+            echo "Stack development not found, creating it..."
+            pulumi stack init development
+          fi
+    
           pulumi preview --stack development
         env:
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
