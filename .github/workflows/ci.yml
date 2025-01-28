@@ -73,6 +73,10 @@ jobs:
             # Optional wait to ensure the stack is fully initialized before proceeding
             sleep 2 
             
+            # List all stacks for debugging
+            echo "🔍 Listing all stacks after creation attempt..."
+            pulumi stack ls --json
+            
             # Verify that the stack was created successfully
             if pulumi stack ls --json | jq -r '.[].name' | grep -q "^development$"; then
               echo "✅ Stack 'development' created successfully."
@@ -87,4 +91,5 @@ jobs:
           pulumi preview --stack development
         env:
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
-
+  
+  
