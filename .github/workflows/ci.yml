@@ -21,15 +21,6 @@ jobs:
         run: |
           cd app
           npm install
-      # - name: Run unit tests in /app
-      #   run: |
-      #     cd app
-      #     npm test
-
-      # - name: Run integration tests in /app
-      #   run: |
-      #     cd app
-      #     npm run test:integration
 
   test-infra:
     runs-on: ubuntu-latest
@@ -65,7 +56,7 @@ jobs:
           echo "Setting up Pulumi backend storage in GCS..."
           echo "export PULUMI_BACKEND_URL=gs://shortlet-pulumi-state" >> $GITHUB_ENV
           echo "export PULUMI_CONFIG_PASSPHRASE=${{ secrets.PULUMI_CONFIG_PASSPHRASE }}" >> $GITHUB_ENV
-
+      
       - name: Validate Pulumi Infrastructure
         run: |
           cd infra
@@ -78,6 +69,9 @@ jobs:
           else
             echo "⚠️ Stack 'development' not found, creating it..."
             pulumi stack init development
+            
+            # Optional wait to ensure the stack is fully initialized before proceeding
+            sleep 2 
           fi
 
           # Run Pulumi preview
