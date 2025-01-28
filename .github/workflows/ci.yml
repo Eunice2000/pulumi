@@ -17,7 +17,7 @@ jobs:
         with:
           node-version: 18 
 
-      - name: Navigate to /app and install dependencies 
+      - name: Navigate to /app and install dependencies  
         run: |
           cd app
           npm install
