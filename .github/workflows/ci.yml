@@ -76,6 +76,5 @@ jobs:
         run: |
           cd infra
           pulumi login ${PULUMI_BACKEND_URL}
-          pulumi stack init development 
           export PULUMI_CONFIG_PASSPHRASE=${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
           pulumi preview --stack development
