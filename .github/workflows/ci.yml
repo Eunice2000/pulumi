@@ -77,9 +77,9 @@ jobs:
             echo "Stack development exists, selecting it..."
           else
             echo "Stack development not found, creating it..."
-            pulumi stack init development
+            pulumi stack init development && preview --stack development 
           fi
     
-          pulumi preview --stack development
+          # pulumi preview --stack development
         env:
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
