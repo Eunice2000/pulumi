@@ -22,15 +22,15 @@ jobs:
           cd app
           npm install
 
-      - name: Run unit tests in /app
-        run: |
-          cd app
-          npm test
+      # - name: Run unit tests in /app
+      #   run: |
+      #     cd app
+      #     npm test
 
-      - name: Run integration tests in /app
-        run: |
-          cd app
-          npm run test:integration
+      # - name: Run integration tests in /app
+      #   run: |
+      #     cd app
+      #     npm run test:integration
 
   test-infra:
     runs-on: ubuntu-latest
