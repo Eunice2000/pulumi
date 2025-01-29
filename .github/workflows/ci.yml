@@ -38,9 +38,9 @@ jobs:
         uses: pulumi/actions@v5
         with:
           command: preview
-          stack-name: organization/shortlet-infrastructure/development
+          stack-name: shortlet/shortlet-infrastructure/development
           work-dir: ./infra
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+          credentials_json: ${{ secrets.GCP_CREDENTIALS }}
 
