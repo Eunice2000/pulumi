@@ -6,51 +6,27 @@ on:
   pull_request:
 
 jobs:
-  test-preview:
+  pulumi-up:
+    name: pulumi-up
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Google Cloud SDK
-        uses: google-github-actions/setup-gcloud@v2
-        with:
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-
-      - name: Set Google Application Credentials
-        run: |
-          echo "${{ secrets.GCP_CREDENTIALS_JSON }}" > /home/runner/work/pulumi/pulumi/gcp-key.json
-          echo "GOOGLE_APPLICATION_CREDENTIALS=/home/runner/work/pulumi/pulumi/gcp-key.json" >> $GITHUB_ENV
-
-      - name: Set up Node.js
+      - name: Set up Node.js 18
         uses: actions/setup-node@v4
         with:
           node-version: 18
 
-      - name: Set Pulumi Backend Environment Variables
-        run: |
-          echo "PULUMI_BACKEND_URL=gs://shortlet-pulumi-state" >> $GITHUB_ENV
-          echo "PULUMI_CONFIG_PASSPHRASE=${{ secrets.PULUMI_CONFIG_PASSPHRASE }}" >> $GITHUB_ENV
+      - name: Install Dependencies
+        working-directory: ./infra
+        run: npm install
 
-      - name: List existing Pulumi stacks
-        run: pulumi stack ls
-        working-directory: infra
-
-      - name: Initialize or Select Pulumi Stack
-        run: |
-          pulumi stack select development --cwd infra || pulumi stack init development --cwd infra
-          pulumi stack ls --cwd infra  # Ensure the stack is recognized
-        env:
-          PULUMI_BACKEND_URL: gs://shortlet-pulumi-state
-          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
-
-      - name: Wait for Pulumi Stack Recognition (Fix for CI Delay)
-        run: sleep 5  # Gives time for Pulumi backend to recognize the new stack 
-
-      - name: Run Pulumi Preview
-        run: |
-          ls -la
-          pulumi stack select development
+      - name: Create the resources
+        uses: pulumi/actions@v5
+        with:
+          command: preview
+          stack-name: organization/shortlet-infrastructure/development
+          work-dir: ./infra
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-        working-directory: infra
