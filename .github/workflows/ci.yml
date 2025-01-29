@@ -42,5 +42,5 @@ jobs:
           work-dir: ./infra
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-          GOOGLE_APPLICATION_CREDENTIALS: $HOME/gcp-credentials.json
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
 
