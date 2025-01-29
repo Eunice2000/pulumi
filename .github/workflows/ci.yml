@@ -150,30 +150,36 @@ on:
 #           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 #         working-directory: infra
 jobs:
-  deploy:
+  test-preview:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    
-    - uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
-        
-    - uses: google-github-actions/setup-gcloud@v2
-    
-    - run: gcloud auth application-default login --quiet
-    
-    - uses: actions/setup-node@v4
-    
-    - run: npm ci
-    
-    - run: pulumi login gs://shortlet-pulumi-state
-    
-    - run: pulumi stack select development
-      env:
-        PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
-        
-    - run: pulumi preview --non-interactive
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}  # Critical change here
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Pulumi Login
+        run: pulumi login gs://shortlet-pulumi-state
+
+      - name: Initialize or Select Pulumi Stack
+        run: |
+          pulumi stack select development --cwd infra || pulumi stack init development --cwd infra
+        env:
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+
+      - name: Run Pulumi Preview
+        run: pulumi preview --non-interactive --cwd infra
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
 
 
   # deploy:
