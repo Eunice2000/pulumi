@@ -114,8 +114,7 @@ jobs:
         with:
           node-version: 18
 
-      - name: Pulumi Login
-        run: pulumi login gs://shortlet-pulumi-state
+
 
       - name: Set Pulumi Backend Environment Variables
         run: |
