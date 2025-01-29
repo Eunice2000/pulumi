@@ -145,7 +145,7 @@ jobs:
       - name: Run Pulumi Preview
         run: |
          ls -la
-         pulumi stack select organization/shortlet-infrastructure/development
+         pulumi stack select development
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
         working-directory: infra
