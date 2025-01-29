@@ -140,7 +140,7 @@ jobs:
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
 
       - name: Wait for Pulumi Stack Recognition (Fix for CI Delay)
-        run: sleep 5  # Gives time for Pulumi backend to recognize the new stack
+        run: sleep 5  # Gives time for Pulumi backend to recognize the new stack 
 
       - name: Run Pulumi Preview
         run: |
