@@ -121,7 +121,9 @@ jobs:
         run: pulumi login gs://shortlet-pulumi-state
 
       - name: Preview
-        run: pulumi preview --stack shortlet-infrastructure/development --non-interactive
+      - run: cd infra
+      - run: pulumi stack ls
+      - run: pulumi preview --stack development --non-interactive
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
         working-directory: infra
