@@ -93,62 +93,6 @@ on:
     branches: [main]
   pull_request:
 
-# jobs:
-#   test-preview:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout repository
-#         uses: actions/checkout@v4
-
-#       - name: Set up Google Cloud SDK
-#         uses: google-github-actions/setup-gcloud@v2
-#         with:
-#           project_id: ${{ secrets.GCP_PROJECT_ID }}
-
-#       - name: Authenticate to Google Cloud
-#         run: |
-#           echo '${{ secrets.GCP_SA_KEY }}' > gcp-key.json
-#           gcloud auth activate-service-account --key-file=gcp-key.json
-#           gcloud auth list
-
-#       - name: Set Google Application Credentials
-#         run: echo "GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/gcp-key.json" >> $GITHUB_ENV
-
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v4
-#         with:
-#           node-version: 18
-
-#       - name: Pulumi Login
-#         run: pulumi login gs://shortlet-pulumi-state
-
-#       - name: Set Pulumi Backend Environment Variables
-#         run: |
-#           echo "PULUMI_BACKEND_URL=gs://shortlet-pulumi-state" >> $GITHUB_ENV
-#           echo "PULUMI_CONFIG_PASSPHRASE=${{ secrets.PULUMI_CONFIG_PASSPHRASE }}" >> $GITHUB_ENV
-
-#       - name: List existing Pulumi stacks
-#         run: pulumi stack ls
-#         working-directory: infra
-
-#       - name: Initialize or Select Pulumi Stack
-#         run: |
-#           pulumi stack select development --cwd infra || pulumi stack init development --cwd infra
-#           pulumi stack ls --cwd infra  # Ensure the stack is recognized
-#         env:
-#           PULUMI_BACKEND_URL: gs://shortlet-pulumi-state
-#           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
-
-#       - name: Wait for Pulumi Stack Recognition (Fix for CI Delay)
-#         run: sleep 5  # Gives time for Pulumi backend to recognize the new stack 
-
-#       - name: Run Pulumi Preview
-#         run: |
-#          ls -la
-#          pulumi stack select development
-#         env:
-#           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-#         working-directory: infra
 jobs:
   test-preview:
     runs-on: ubuntu-latest
@@ -160,7 +104,17 @@ jobs:
         uses: google-github-actions/setup-gcloud@v2
         with:
           project_id: ${{ secrets.GCP_PROJECT_ID }}
-          service_account_key: ${{ secrets.GCP_SA_KEY }}  # Critical change here
+
+      - name: Configure ADC
+        run: |
+          gcloud auth activate-service-account --key-file=$GOOGLE_APPLICATION_CREDENTIALS
+          gcloud auth application-default set-quota-project $GCP_PROJECT
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+          GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Set Google Application Credentials
+        run: echo "GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/gcp-key.json" >> $GITHUB_ENV
 
       - name: Set up Node.js
         uses: actions/setup-node@v4
@@ -170,16 +124,64 @@ jobs:
       - name: Pulumi Login
         run: pulumi login gs://shortlet-pulumi-state
 
+      - name: Set Pulumi Backend Environment Variables
+        run: |
+          echo "PULUMI_BACKEND_URL=gs://shortlet-pulumi-state" >> $GITHUB_ENV
+          echo "PULUMI_CONFIG_PASSPHRASE=${{ secrets.PULUMI_CONFIG_PASSPHRASE }}" >> $GITHUB_ENV
+
+      - name: List existing Pulumi stacks
+        run: pulumi stack ls
+        working-directory: infra
+
       - name: Initialize or Select Pulumi Stack
         run: |
           pulumi stack select development --cwd infra || pulumi stack init development --cwd infra
+          pulumi stack ls --cwd infra  # Ensure the stack is recognized
         env:
+          PULUMI_BACKEND_URL: gs://shortlet-pulumi-state
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
 
+      - name: Wait for Pulumi Stack Recognition (Fix for CI Delay)
+        run: sleep 5  # Gives time for Pulumi backend to recognize the new stack 
+
       - name: Run Pulumi Preview
-        run: pulumi preview --non-interactive --cwd infra
+        run: |
+         ls -la
+         pulumi stack select development
         env:
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+        working-directory: infra
+# jobs:
+#   test-preview:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v4
+
+#       - name: Set up Google Cloud SDK
+#         uses: google-github-actions/setup-gcloud@v2
+#         with:
+#           project_id: ${{ secrets.GCP_PROJECT_ID }}
+#           service_account_key: ${{ secrets.GCP_SA_KEY }}  # Critical change here
+
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: 18
+
+#       - name: Pulumi Login
+#         run: pulumi login gs://shortlet-pulumi-state
+
+#       - name: Initialize or Select Pulumi Stack
+#         run: |
+#           pulumi stack select development --cwd infra || pulumi stack init development --cwd infra
+#         env:
+#           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+
+#       - name: Run Pulumi Preview
+#         run: pulumi preview --non-interactive --cwd infra
+#         env:
+#           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GCP_SA_KEY }}
 
 
   # deploy:
