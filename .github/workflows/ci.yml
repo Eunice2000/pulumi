@@ -143,7 +143,7 @@ jobs:
         run: sleep 5  # Gives time for Pulumi backend to recognize the new stack
 
       - name: Run Pulumi Preview
-        run: pulumi preview --stack development --non-interactive
+        run: pulumi stack select shortlet-infrastructure/development
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
         working-directory: infra
