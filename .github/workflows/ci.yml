@@ -7,14 +7,22 @@ on:
 
 
 jobs:
-  pulumi-up:
-    name: pulumi-up
+  test-preview:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Set up Node.js 18
+      - name: Set up Google Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+
+      - name: Set Google Application Credentials
+        run: echo "GOOGLE_APPLICATION_CREDENTIALS=$(pwd)/gcp-key.json" >> $GITHUB_ENV
+
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 18
