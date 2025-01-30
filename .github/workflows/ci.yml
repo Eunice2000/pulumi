@@ -65,12 +65,6 @@ jobs:
       - name: Install dependencies for infra
         run: npm install
         working-directory: infra
-      # - name: Initialize or Select Pulumi Stack (Development)
-      #   run: |
-      #     pulumi stack select development --cwd infra || pulumi stack init development --cwd infra
-      #   env:
-      #     PULUMI_BACKEND_URL: gs://shortlet-pulumi-state
-      #     PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
 
       - name: Run Pulumi Preview for Development
         uses: pulumi/actions@v6
@@ -85,15 +79,23 @@ jobs:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           PULUMI_BACKEND_URL: gs://shortlet-pulumi-state
           PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
-    
-      # - name: Initialize or Select Pulumi Stack (staging)
-      #   run: |
-      #     pulumi stack select staging --cwd infra || pulumi stack init staging --cwd infra
-      #   env:
-      #     PULUMI_BACKEND_URL: gs://shortlet-pulumi-state
-      #     PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
 
-      - name: Preview staging stack
+
+      - name: Run Pulumi Preview for staging
+        uses: pulumi/actions@v6
+        with:
+          command: preview
+          stack-name: staging
+          comment-on-pr: true
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          work-dir: infra
+          upsert: true
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          PULUMI_BACKEND_URL: gs://shortlet-pulumi-state
+          PULUMI_CONFIG_PASSPHRASE: ${{ secrets.PULUMI_CONFIG_PASSPHRASE }}
+          
+      - name: Run Pulumi Preview for production
         uses: pulumi/actions@v6
         with:
           command: preview
